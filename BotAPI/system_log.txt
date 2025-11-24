@@ -1,0 +1,75 @@
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 58, in main
+    roll_min, roll_max = analyzer.obtener_extremos_locales()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MarketAnalyzer' object has no attribute 'obtener_extremos_locales'
+
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandas\core\indexes\base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'volume'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 46, in main
+    df_calc = analyzer.calcular_todo()
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\indicators.py", line 29, in calcular_todo
+    self.df['OBV'] = OnBalanceVolumeIndicator(self.df['close'], self.df['volume']).on_balance_volume()
+                                                                ~~~~~~~^^^^^^^^^^
+  File "C:\Users\Santi\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandas\core\frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "C:\Users\Santi\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandas\core\indexes\base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'volume'
+
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 34, in main
+    df = client.obtener_velas()
+TypeError: BinanceClient.obtener_velas() missing 1 required positional argument: 'timeframe'
+
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 49, in main
+    log_accion = strategy.ejecutar_estrategia(df_calc, roll_min, roll_max, precio_real)
+TypeError: StrategyEngine.ejecutar_estrategia() missing 1 required positional argument: 'precio'
+
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 34, in main
+    df_scalp = client.obtener_velas(cfg.TF_SCALP)
+                                    ^^^^^^^^^^^^
+AttributeError: 'Config' object has no attribute 'TF_SCALP'
+
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 52, in main
+    log_accion = strategy.ejecutar_estrategia(df_s_calc, df_w_calc, roll_min, roll_max, precio_real)
+TypeError: StrategyEngine.ejecutar_estrategia() takes 5 positional arguments but 6 were given
+
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 52, in main
+    log_accion = strategy.ejecutar_estrategia(df_s_calc, df_w_calc, roll_min, roll_max, precio_real)
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\strategies.py", line 266, in ejecutar_estrategia
+    tp = roll_max * 0.999; sl = precio * (1-self.cfg.SCALP_SL_PCT)
+                                            ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Config' object has no attribute 'SCALP_SL_PCT'
+
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 52, in main
+    log_accion = strategy.ejecutar_estrategia(df_s_calc, df_w_calc, roll_min, roll_max, precio_real)
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\strategies.py", line 236, in ejecutar_estrategia
+    trend_ok_long = precio > ma99
+                    ^^^^^^^^^^^^^
+TypeError: '<' not supported between instances of 'float' and 'NoneType'
+
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 52, in main
+    log_accion = strategy.ejecutar_estrategia(df_s_calc, df_w_calc, roll_min, roll_max, precio_real)
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\strategies.py", line 228, in ejecutar_estrategia
+    tp = roll_min * 1.001; sl = precio * (1+self.cfg.SCALP_SL_PCT)
+                                            ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Config' object has no attribute 'SCALP_SL_PCT'
+
