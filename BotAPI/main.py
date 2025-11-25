@@ -16,63 +16,62 @@ def main():
     logging.basicConfig(filename=cfg.LOG_FILE, level=logging.INFO)
     print(f"{Fore.CYAN}Iniciando SENTINEL PRO (Modo: {cfg.MODE})...{Fore.RESET}")
     
-    if cfg.MODE == 'SIMULATION': 
-        client = MockClient(cfg)
-    else: 
-        client = BinanceClient(cfg)
-        
+    client = MockClient(cfg) if cfg.MODE == 'SIMULATION' else BinanceClient(cfg)
     client.inicializar()
-    
     strategy = StrategyEngine(cfg, client)
-    print("Sincronizando Timeframes (1m + 15m)...")
+    
+    print("Sincronizando Timeframes...")
     time.sleep(2)
 
     try:
         while True:
-            time.sleep(3) 
+            # Ciclo de 1 segundo para Momentum
+            time.sleep(1) 
 
             df_scalp = client.obtener_velas(cfg.TF_SCALP)
             df_swing = client.obtener_velas(cfg.TF_SWING)
             
-            if df_scalp.empty or df_swing.empty: 
-                print(f"{Fore.YELLOW}Esperando datos de mercado...{Fore.RESET}")
-                continue
+            if df_scalp.empty or df_swing.empty: continue
 
-            precio_real = client.obtener_precio_real()
+            precio = client.obtener_precio_real()
             
-            if precio_real:
-                df_scalp.iloc[-1, df_scalp.columns.get_loc('close')] = precio_real
-                df_scalp.iloc[-1, df_scalp.columns.get_loc('high')] = max(df_scalp.iloc[-1]['high'], precio_real)
-                df_scalp.iloc[-1, df_scalp.columns.get_loc('low')] = min(df_scalp.iloc[-1]['low'], precio_real)
-                df_swing.iloc[-1, df_swing.columns.get_loc('close')] = precio_real
+            # Validación crítica de precio
+            if not precio: 
+                continue 
 
-            ana_scalp = MarketAnalyzer(df_scalp)
-            df_s_calc = ana_scalp.calcular_todo(rsi_period=cfg.SCALP_RSI_PERIOD)
-            roll_min, roll_max = ana_scalp.obtener_extremos_locales()
-            
-            ana_swing = MarketAnalyzer(df_swing)
-            df_w_calc = ana_swing.calcular_todo(rsi_period=cfg.SWING_RSI_PERIOD)
+            # Inyección de precio real
+            df_scalp.iloc[-1, df_scalp.columns.get_loc('close')] = precio
+            df_scalp.iloc[-1, df_scalp.columns.get_loc('high')] = max(df_scalp.iloc[-1]['high'], precio)
+            df_scalp.iloc[-1, df_scalp.columns.get_loc('low')] = min(df_scalp.iloc[-1]['low'], precio)
+            df_swing.iloc[-1, df_swing.columns.get_loc('close')] = precio
 
-            log_accion = strategy.ejecutar_estrategia(df_s_calc, df_w_calc, roll_min, roll_max, precio_real)
+            # Indicadores
+            ana_s = MarketAnalyzer(df_scalp); df_s = ana_s.calcular_todo(cfg.SCALP_RSI_PERIOD)
+            ana_w = MarketAnalyzer(df_swing); df_w = ana_w.calcular_todo(cfg.SWING_RSI_PERIOD)
+            rmin, rmax = ana_s.obtener_extremos_locales()
+
+            # Ejecución Estrategia
+            msg = strategy.ejecutar_estrategia(df_s, df_w, rmin, rmax, precio)
             
-            funcion_activa = log_accion if log_accion else "ESPERA / MONITOREO"
-            v_score, _ = strategy.analizar_ind_vol(df_s_calc)
+            # --- CORRECCIÓN AQUÍ ---
+            # 1. Volumetría solo para Scalp
+            vol = strategy.scalp_mode.analizar_volumetria(df_s)
             
+            # 2. Datos Momentum (Solo obtenemos el cambio %, el ratio ya no aplica en segundos)
+            mom_chg = strategy.mom_mode.obtener_datos_tiempo_real()
+            mom_ratio = 0.0 # Valor placeholder para el dashboard
+            
+            ordenes_reales = client.obtener_ordenes_abiertas() if cfg.MODE != 'SIMULATION' else []
+
             dashboard.mostrar_panel(
-                df_s_calc, 
-                df_w_calc, # Enviamos ambos DFs al dashboard
-                v_score, 
-                funcion_activa, 
-                cfg.MODE, 
-                strategy.trader.posicion_abierta
+                df_s, df_w, vol, msg, cfg.MODE, 
+                strategy.trader.posicion_abierta,
+                ordenes_reales, 
+                mom_ratio, mom_chg
             )
 
     except KeyboardInterrupt:
-        # --- AQUÍ SE GENERA EL REPORTE FINAL ---
-        print("\n\n")
-        print(strategy.trader.stats.obtener_reporte())
-        print("\nDeteniendo sistema...")
-        
+        print(strategy.trader.stats.obtener_reporte_forense())
     except Exception as e:
         logging.error(traceback.format_exc())
         print(f"\nERROR: {e}")
