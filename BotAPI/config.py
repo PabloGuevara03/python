@@ -1,26 +1,33 @@
 # config.py
 import os
+from dotenv import load_dotenv
+
+# Carga las variables del archivo .env al entorno del sistema
+load_dotenv()
 
 class Config:
     # ==========================================
-    # 1. MODO Y CREDENCIALES
+    # 1. MODO Y CREDENCIALES (SECURE)
     # ==========================================
-    MODE = 'TESTNET' 
+    # Ahora lee desde el sistema, si no encuentra nada, usa valores por defecto seguros
+    MODE = os.getenv('MODE', 'TESTNET')
     
-    API_KEY =  "7taoqalyG9M2AjDizAPphthbOYN18pIYZpy3eOltVM3OsisbvJBXZjySpn8WFeDJ"   
-    API_SECRET =  "eJpFCSoWVS59QgKTkhQpmvQnRHLGy5MCQPZ4pHZ02jMOWGbfeLlBNbH3Afb6EAsR"
+    API_KEY = os.getenv('BINANCE_API_KEY')
+    API_SECRET = os.getenv('BINANCE_API_SECRET')
     
+    # Validación simple para evitar arrancar sin claves
+    if not API_KEY or not API_SECRET:
+        raise ValueError("❌ ERROR: Faltan las API KEYS en el archivo .env")
+
     # ==========================================
     # 2. MERCADO Y TIEMPOS
     # ==========================================
     SYMBOL = 'BTC/USDT'  
     USE_REAL_DATA_FOR_SIM = False 
     
-    # Timeframes para Estrategia Dual
     TF_SCALP = '1m'
     TF_SWING = '15m'
     
-    # Retro-compatibilidad
     TIMEFRAME_LIVE = TF_SCALP 
     TIMEFRAME_INIT = '5m'
     
@@ -41,10 +48,9 @@ class Config:
     SCALP_RSI_OS = 25          
     SCALP_VOL_THRESHOLD = 20   
     
-    # Riesgo Scalping
-    SCALP_SL_PCT = 0.004       # 0.4% Stop Loss Inicial
-    SCALP_BE_TRIGGER = 0.002   # 0.2% Trigger Break Even
-    SCALP_TRAIL_DIST = 0.0015  # 0.15% Distancia Trailing
+    SCALP_SL_PCT = 0.004       
+    SCALP_BE_TRIGGER = 0.002   
+    SCALP_TRAIL_DIST = 0.0015  
     
     # ==========================================
     # 5. ESTRATEGIA SWING (15m)

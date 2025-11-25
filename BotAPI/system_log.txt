@@ -73,3 +73,35 @@ ERROR:root:Traceback (most recent call last):
                                             ^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'Config' object has no attribute 'SCALP_SL_PCT'
 
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 60, in main
+    log_accion = strategy.ejecutar_estrategia(df_s_calc, df_w_calc, roll_min, roll_max, precio_real)
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\strategies.py", line 316, in ejecutar_estrategia
+    trend_ok_long = precio > ma99
+                    ^^^^^^^^^^^^^
+TypeError: '<' not supported between instances of 'float' and 'NoneType'
+
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 61, in main
+    dashboard.mostrar_panel(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        df_s_calc,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        strategy.trader.posicion_abierta
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\dashboard.py", line 105, in mostrar_panel
+    print(f"{Fore.DIM}\n       [ NO HAY POSICIONES ABIERTAS ]\n{Style.RESET_ALL}")
+             ^^^^^^^^
+AttributeError: 'AnsiFore' object has no attribute 'DIM'
+
+ERROR:root:Traceback (most recent call last):
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\main.py", line 56, in main
+    log_accion = strategy.ejecutar_estrategia(df_s_calc, df_w_calc, roll_min, roll_max, precio_real)
+  File "C:\Users\Santi\Downloads\pablo\python\BotAPI\strategies.py", line 359, in ejecutar_estrategia
+    trend_ok_long = precio > ma99
+                    ^^^^^^^^^^^^^
+TypeError: '<' not supported between instances of 'float' and 'NoneType'
+

@@ -14,10 +14,13 @@ init(autoreset=True)
 def main():
     cfg = Config()
     logging.basicConfig(filename=cfg.LOG_FILE, level=logging.INFO)
-    print(f"{Fore.CYAN}Iniciando SENTINEL PRO (Dual Engine)...{Fore.RESET}")
+    print(f"{Fore.CYAN}Iniciando SENTINEL PRO (Modo: {cfg.MODE})...{Fore.RESET}")
     
-    if cfg.MODE == 'SIMULATION': client = MockClient(cfg)
-    else: client = BinanceClient(cfg)
+    if cfg.MODE == 'SIMULATION': 
+        client = MockClient(cfg)
+    else: 
+        client = BinanceClient(cfg)
+        
     client.inicializar()
     
     strategy = StrategyEngine(cfg, client)
@@ -31,7 +34,9 @@ def main():
             df_scalp = client.obtener_velas(cfg.TF_SCALP)
             df_swing = client.obtener_velas(cfg.TF_SWING)
             
-            if df_scalp.empty or df_swing.empty: continue
+            if df_scalp.empty or df_swing.empty: 
+                print(f"{Fore.YELLOW}Esperando datos de mercado...{Fore.RESET}")
+                continue
 
             precio_real = client.obtener_precio_real()
             
@@ -39,7 +44,6 @@ def main():
                 df_scalp.iloc[-1, df_scalp.columns.get_loc('close')] = precio_real
                 df_scalp.iloc[-1, df_scalp.columns.get_loc('high')] = max(df_scalp.iloc[-1]['high'], precio_real)
                 df_scalp.iloc[-1, df_scalp.columns.get_loc('low')] = min(df_scalp.iloc[-1]['low'], precio_real)
-                
                 df_swing.iloc[-1, df_swing.columns.get_loc('close')] = precio_real
 
             ana_scalp = MarketAnalyzer(df_scalp)
@@ -56,15 +60,19 @@ def main():
             
             dashboard.mostrar_panel(
                 df_s_calc, 
+                df_w_calc, # Enviamos ambos DFs al dashboard
                 v_score, 
-                {}, 
                 funcion_activa, 
                 cfg.MODE, 
                 strategy.trader.posicion_abierta
             )
 
     except KeyboardInterrupt:
-        print("\nDeteniendo...")
+        # --- AQUÍ SE GENERA EL REPORTE FINAL ---
+        print("\n\n")
+        print(strategy.trader.stats.obtener_reporte())
+        print("\nDeteniendo sistema...")
+        
     except Exception as e:
         logging.error(traceback.format_exc())
         print(f"\nERROR: {e}")
